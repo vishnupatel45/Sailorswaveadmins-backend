@@ -1,9 +1,9 @@
-const { Candidate } = require('../models/applicationForm');
+const { FormData } = require('../models/applicationForm');
 
 const Postapplicationform = async (req, res) => {
     try {
         const applicationId = Math.floor(1000000000 + Math.random() * 9000000000);
-        const candidate = new Candidate({
+        const candidate = new FormData({
             applicationId:applicationId,
             applicationstatus:false,
             applyFor: req.body.applyFor,
@@ -44,7 +44,7 @@ const Postapplicationform = async (req, res) => {
 
 const Getapplicationform = async(req,res) =>{
     try{
-        const candidate = await Candidate.find();
+        const candidate = await FormData.find();
         res.status(200).json(candidate);
     }catch(error){
         console.error(error, 'Error while handling get application form');

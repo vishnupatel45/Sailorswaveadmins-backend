@@ -112,8 +112,13 @@ const ApplicationSchema = new mongoose.Schema({
   aadhar:{
     type:String,
     required:false
-  }
-}, { timestamps: true });
-const Candidate = mongoose.model('Application', ApplicationSchema);
+  },
+  passport: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' },   // Reference for photo file
+  class10th: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' },  // Reference for 10th marksheet file
+  aadhar: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' }   // Reference for 12th marksheet file
 
-module.exports = { Candidate };
+}, { timestamps: true });
+const FormData = mongoose.model('Application', ApplicationSchema);
+
+module.exports = { FormData };
+
