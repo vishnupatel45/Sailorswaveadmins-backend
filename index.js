@@ -9,7 +9,7 @@ const { GridFSBucket } = require('mongodb');
 
 // Initialize Express app
 const app = express();
-const PORT = 7001;
+const PORT = 7000;
 const mongoURI = 'mongodb://localhost:27017/Sailors';
 
 // DB Connection using Mongoose
@@ -168,7 +168,7 @@ app.patch('/candidate/:id', async (req, res) => {
   }
 });
 
-app.get('/candidates', async (req, res) => {
+app.get('/candidate', async (req, res) => {
   try {
     const candidates = await FormData.find({});
     if (!candidates || candidates.length === 0) {
