@@ -7,6 +7,7 @@ const path = require('path');
 const { GridFsStorage } = require('multer-gridfs-storage');
 const { GridFSBucket } = require('mongodb');
 
+
 // Initialize Express app
 const app = express();
 const PORT = 7001;
@@ -254,4 +255,4 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server is running on this port and  http://localhost:${PORT}`));
