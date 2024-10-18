@@ -232,6 +232,22 @@ app.post('/userformsubmit', upload.fields([
   }
 });
 
+app.get('/subadmin/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Use the Subadmin model directly
+    const subadmin = await Subadmin.findById(id);
+    if (!subadmin) {
+      return res.status(404).send('Subadmin not found.');
+    }
+    res.json(subadmin);
+  } catch(error) {
+    console.error('Error fetching subadmin:', error);
+    res.status(500).send('Error fetching subadmin.');
+  }
+});
+
+
 // Root route
 app.get('/', (req, res) => {
   res.send('Welcome to Sailors API');
