@@ -11,6 +11,7 @@ const { Subadmin } = require('./models/admin/subadmin.js')
 // const { upload } = require('./utils/adminfiles.js')
 const { mainSubadmin } = require('./models/subadmin/mainsubadmin.js')
 
+
 // Initialize Express app
 const app = express();
 const PORT = 7001;
@@ -316,4 +317,4 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server is running on this port and  http://localhost:${PORT}`));
