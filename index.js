@@ -6,10 +6,14 @@ const crypto = require('crypto');
 const path = require('path');
 const { GridFsStorage } = require('multer-gridfs-storage');
 const { GridFSBucket } = require('mongodb');
+const { FormData } = require('./models/user/applicatonform.js')
+const { Subadmin } = require('./models/admin/subadmin.js')
+// const { upload } = require('./utils/adminfiles.js')
+const { mainSubadmin } = require('./models/subadmin/mainsubadmin.js')
 
 // Initialize Express app
 const app = express();
-const PORT = 7000;
+const PORT = 7001;
 const mongoURI = 'mongodb://localhost:27017/Sailors';
 
 // DB Connection using Mongoose
@@ -27,161 +31,26 @@ conn.once('open', () => {
   console.log('GridFSBucket initialized');
 });
 
-// Define Mongoose schema and model for form data
-const formSchema = new mongoose.Schema({
-  applicationId: {
-    type: Number,
-  },
-  applicationstatus: {
-    type: Boolean
-  },
-  applyFor: { type: String, required: true },
-  candidateName: { type: String, required: true },
-  fatherName: { type: String, required: true },
-  dob: { type: Date, required: true },
-  gender: {
-    type: String,
-    enum: ['Male', 'Female', 'Other'],
-    default: 'Male'
-  },
-
-  mobileNumber: { type: String, required: true },
-  email: { type: String, required: true },
-  houseNo: { type: String },
-  postOffice: { type: String },
-  policeStation: { type: String },
-  district: { type: String },
-  city: { type: String },
-  state: { type: String },
-  postalCode: { type: String },
-  tenthschool: { type: String },
-  tenthyear: { type: String },
-  tenthpercentage: { type: String },
-  twelfthschool: { type: String },
-  twelfthyear: { type: String },
-  twelfthpercentage: { type: String },
-  degreeschool: { type: String },
-  degreeyear: { type: String },
-  degreepercentage: { type: String },
-  passport: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' },
-  class10th: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' },
-  aadhar: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' }
-});
-const FormData = mongoose.model('UserFormData', formSchema);
-
-const SubadminSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  number: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  photoId: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' }  // Reference to GridFS file
-});
-
-const Subadmin = mongoose.model('Subadmin', SubadminSchema);
-
-
-// Multer GridFS Storage configuration
 const storage = new GridFsStorage({
   url: mongoURI,
   file: (req, file) => {
-    return new Promise((resolve, reject) => {
-      crypto.randomBytes(16, (err, buf) => {
-        if (err) {
-          return reject(err);
-        }
-        const filename = buf.toString('hex') + path.extname(file.originalname);
-        const fileInfo = {
-          filename: filename,
-          bucketName: 'uploads'  // Bucket name should match the one used in GridFSBucket
-        };
-        resolve(fileInfo);
+      return new Promise((resolve, reject) => {
+          crypto.randomBytes(16, (err, buf) => {
+              if (err) {
+                  return reject(err);
+              }
+              const filename = buf.toString('hex') + path.extname(file.originalname);
+              const fileInfo = {
+                  filename: filename,
+                  bucketName: 'uploads'  // Bucket name should match the one used in GridFSBucket
+              };
+              resolve(fileInfo);
+          });
       });
-    });
   }
 });
 
 const upload = multer({ storage });
-
-//////////////////////////////creating subadmin///////////////////////
-app.post("/subadmincreate", upload.single('file'), async (req, res) => {
-  try {
-    const { name, email, number, password } = req.body;
-
-    if (!name || !email || !number || !password || !req.file) {
-      return res.status(400).send("All fields are required, including the file.");
-    }
-
-    // Create a new subadmin entry
-    const newSubadmin = new Subadmin({
-      name,
-      number,
-      email,
-      password,
-      photoId: new mongoose.Types.ObjectId(req.file.id)  // Ensure using Mongoose's ObjectId
-    });
-
-    // Save subadmin to the database
-    await newSubadmin.save();
-    res.status(200).json({ message: 'Subadmin created successfully', subadmin: newSubadmin });
-  } catch (err) {
-    console.error('Error creating subadmin:', err);
-    res.status(500).send("Server error. Could not create subadmin.");
-  }
-});
-
-
-
-// Get file by ID
-app.get('/fileById/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const file = await conn.db.collection('uploads.files').findOne({ _id: new mongoose.Types.ObjectId(id) });
-    if (!file) {
-      return res.status(404).send('File not found.');
-    }
-
-    const downloadStream = gfsBucket.openDownloadStream(file._id);
-    res.set('Content-Type', file.contentType);
-    res.set('Content-Disposition', `attachment; filename="${file.filename}"`);
-    downloadStream.pipe(res);
-  } catch (error) {
-    console.error('Error fetching file by id:', error);
-    res.status(500).send('Error fetching file.');
-  }
-});
-
-
-/////////////////////it can be or can not be used//////////////////
-app.patch('/candidate/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const candidate = await FormData.find({ applicationId: id });
-    console.log('Candidate:', candidate); // Add this line to log the candidate objec
-    if (!candidate) {
-      return res.status(404).send('candidate not found');
-    }
-    candidate.applicationstatus=true; 
-    res.json(candidate);
-  } catch (error) {
-    console.error('Error fetching candidate:', error);
-    res.status(500).send('Error fetching candidate.');
-  }
-});
-
-app.get('/candidate', async (req, res) => {
-  try {
-    const candidates = await FormData.find({});
-    if (!candidates || candidates.length === 0) {
-      return res.status(404).send('No candidates found');
-    }
-
-    res.json(candidates);
-  } catch (error) {
-    console.error('Error fetching candidates:', error);
-    res.status(500).send('Error fetching candidates');
-  }
-});
-
 
 // Post route for form submission
 app.post('/userformsubmit', upload.fields([
@@ -232,6 +101,71 @@ app.post('/userformsubmit', upload.fields([
   }
 });
 
+app.get('/candidates', async (req, res) => {
+  try {
+    const candidates = await FormData.find({});
+    if (!candidates || candidates.length === 0) {
+      return res.status(404).send('No candidates found');
+    }
+
+    res.json(candidates);
+  } catch (error) {
+    console.error('Error fetching candidates:', error);
+    res.status(500).send('Error fetching candidates');
+  }
+});
+
+// Get file by ID
+app.get('/fileById/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const file = await conn.db.collection('uploads.files').findOne({ _id: new mongoose.Types.ObjectId(id) });
+    if (!file) {
+      return res.status(404).send('File not found.');
+    }
+
+    const downloadStream = gfsBucket.openDownloadStream(file._id);
+    res.set('Content-Type', file.contentType);
+    res.set('Content-Disposition', `attachment; filename="${file.filename}"`);
+    downloadStream.pipe(res);
+  } catch (error) {
+    console.error('Error fetching file by id:', error);
+    res.status(500).send('Error fetching file.');
+  }
+});
+
+/////////////////////it can be or can not be used//////////////////
+app.patch('/candidate/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const candidate = await FormData.find({ applicationId: id });
+    console.log('Candidate:', candidate); // Add this line to log the candidate objec
+    if (!candidate) {
+      return res.status(404).send('candidate not found');
+    }
+    candidate.applicationstatus = true;
+    res.json(candidate);
+  } catch (error) {
+    console.error('Error fetching candidate:', error);
+    res.status(500).send('Error fetching candidate.');
+  }
+});
+
+//........................sub admin routes........................
+app.get('/subadmin', async (req, res) => {
+  try {
+    // Use the Subadmin model directly
+    const subadmin = await Subadmin.find();
+    if (!subadmin) {
+      return res.status(404).send('Subadmin not found.');
+    }
+    res.json(subadmin);
+  } catch (error) {
+    console.error('Error fetching subadmin:', error);
+    res.status(500).send('Error fetching subadmin.');
+  }
+});
+
 app.get('/subadmin/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -241,11 +175,139 @@ app.get('/subadmin/:id', async (req, res) => {
       return res.status(404).send('Subadmin not found.');
     }
     res.json(subadmin);
-  } catch(error) {
+  } catch (error) {
     console.error('Error fetching subadmin:', error);
     res.status(500).send('Error fetching subadmin.');
   }
 });
+
+// subadmin crud operation
+app.delete('/subadmin/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Subadmin.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Subadmin deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting subadmin', error });
+  }
+});
+
+app.put('/subadmin/:id', upload.single('file'), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { name, number, email, password, MyApplication, AdmitCard, InterviewFeedback, SelectionLetter, ConfirmationLetter, Financials } = req.body;
+
+    const updatedData = {
+      name,
+      number,
+      email,
+      password,
+      checklist: {
+        MyApplication: MyApplication === 'true',
+        AdmitCard: AdmitCard === 'true',
+        InterviewFeedback: InterviewFeedback === 'true',
+        SelectionLetter: SelectionLetter === 'true',
+        ConfirmationLetter: ConfirmationLetter === 'true',
+        Financials: Financials === 'true',
+      }
+    };
+
+    if (req.file) {
+      updatedData.photoId = new mongoose.Types.ObjectId(req.file.id);
+    }
+
+    const updatedSubadmin = await Subadmin.findByIdAndUpdate(id, updatedData, { new: true });
+
+    if (!updatedSubadmin) {
+      return res.status(404).json({ message: 'Subadmin not found.' });
+    }
+
+    res.status(200).json({ message: 'Subadmin updated successfully.', updatedSubadmin });
+  } catch (error) {
+    console.error('Error updating subadmin:', error);
+    res.status(500).json({ message: 'Error updating subadmin', error });
+  }
+});
+
+app.post("/subadmincreate", upload.single('file'), async (req, res) => {
+  try {
+    const { name, email, number, password, MyApplication, AdmitCard, InterviewFeedback, SelectionLetter, ConfirmationLetter, Financialsletter } = req.body;
+
+    if (!name || !email || !number || !password || !req.file) {
+      return res.status(400).send("All fields are required, including the file.");
+    }
+
+    // Create a new subadmin entry with checklist fields
+    const newSubadmin = new Subadmin({
+      name,
+      number,
+      email,
+      password,
+      photoId: new mongoose.Types.ObjectId(req.file.id),  // Ensure using Mongoose's ObjectId
+      checklist: {
+        MyApplication: MyApplication === 'true',  // Convert string to boolean
+        AdmitCard: AdmitCard === 'true',
+        InterviewFeedback: InterviewFeedback === 'true',
+        SelectionLetter: SelectionLetter === 'true',
+        ConfirmationLetter: ConfirmationLetter === 'true',
+        Financials: Financialsletter === 'true'
+      }
+    });
+
+    // Save subadmin to the database
+    await newSubadmin.save();
+    res.status(200).json({ message: 'Subadmin created successfully', subadmin: newSubadmin });
+  } catch (err) {
+    console.error('Error creating subadmin:', err);
+    res.status(500).send("Server error. Could not create subadmin.");
+  }
+});
+
+// ....................mainsubadmin......................
+app.post('/loginmainsubadmin', async (req, res) => {
+  try {
+    const { adminEmail, adminPassword } = req.body;
+    if (adminEmail && adminPassword) {
+      const Mainsubadmin = await mainSubadmin.findOne({ adminEmail });
+      if (Mainsubadmin && Mainsubadmin.adminPassword === adminPassword) {
+        res.status(200).json({ message: 'Mainsubadmin found', mainsubadmin: Mainsubadmin });
+      } else {
+        res.status(401).json({ message: 'Invalid email or password' });
+      }
+    } else {
+      res.status(400).send("Email and password are required");
+    }
+  } catch (error) {
+    console.error('Error fetching mainsubadmin:', error);
+  }
+})
+
+app.post("/mainsubadmin", async (req, res) => {
+  try {
+    const { adminEmail, adminPassword } = req.body;
+    const admins = new mainSubadmin({
+      adminEmail, adminPassword
+    })
+    await admins.save()
+    res.status(200).json({ message: 'MainSubadmin created successfully', Mainsubadmin: admins });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(400).json({ message: 'Validation failed', error: error.message });
+  }
+})
+
+app.delete("/mainsubadmin/:id", async (req, res) => {
+  try {
+    const _id = req.params.id
+    const admins = await mainSubadmin.findByIdAndDelete(_id);
+    res.status(200).json({ message: 'MainSubadmin deleted successfully', admins })
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(400).json({ message: 'Validation failed', error: error.message });
+  }
+})
+
 
 
 // Root route
