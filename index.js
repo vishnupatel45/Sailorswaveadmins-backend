@@ -10,7 +10,7 @@ const { GridFSBucket } = require('mongodb');
 
 // Initialize Express app
 const app = express();
-const PORT = 7000;
+const PORT = 7001;
 const mongoURI = 'mongodb://localhost:27017/Sailors';
 
 // DB Connection using Mongoose
@@ -45,7 +45,6 @@ const formSchema = new mongoose.Schema({
     enum: ['Male', 'Female', 'Other'],
     default: 'Male'
   },
-
   mobileNumber: { type: String, required: true },
   email: { type: String, required: true },
   houseNo: { type: String },
@@ -169,7 +168,23 @@ app.patch('/candidate/:id', async (req, res) => {
   }
 });
 
-app.get('/candidate', async (req, res) => {
+app.get('/candidate/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const candidate = await FormData.find({ applicationId: id });
+    console.log('Candidate:', candidate); // Add this line to log the candidate objec
+    if (!candidate) {
+      return res.status(404).send('candidate not found');
+    }
+    res.json(candidate);
+  } catch (error) {
+    console.error('Error fetching candidate:', error);
+    res.status(500).send('Error fetching candidate.');
+  }
+});
+
+
+app.get('/candidates', async (req, res) => {
   try {
     const candidates = await FormData.find({});
     if (!candidates || candidates.length === 0) {
