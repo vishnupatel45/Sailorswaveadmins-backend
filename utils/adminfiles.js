@@ -1,6 +1,7 @@
 const multer = require('multer')
 const { GridFsStorage } = require('multer-gridfs-storage');
 const crypto = require('crypto');
+const path = require('path');
 
 const mongoURI = 'mongodb://localhost:27017/Sailors';
 
