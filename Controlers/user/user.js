@@ -1,4 +1,5 @@
-const {FormData} = require('../../models/user/applicatonform');
+const { FormData } = require('../../models/user/applicatonform');
+const mongoose = require('mongoose')
 
 const HandilePostuser = async (req, res) => {
     try {
@@ -26,7 +27,7 @@ const HandilePostuser = async (req, res) => {
         }
 
         const newFormData = new FormData({
-            applicationId: applicationId, applicationstatus: false,
+            applicationId: applicationId,
             applyFor, candidateName, fatherName, dob, gender, mobileNumber, email, houseNo, postOffice, policeStation, district,
             city, state, postalCode, tenthschool, tenthyear, tenthpercentage, twelfthschool, twelfthyear, twelfthpercentage,
             degreeschool, degreeyear, degreepercentage,
@@ -60,19 +61,57 @@ const HandileGetuser = async (req, res) => {
 
 const HandileUpdateuser = async (req, res) => {
     const { id } = req.params;
+    const {Apstatus,ApOfficerName,admitcardstatus,admitcardofficer,interviewdate,interviewtime,interviewofficer,selectionletterstatus,
+        selectionletterofficer,confirmationletterstatus,confirmationletterofficer} = req.body; // Destructure all relevant fields from the request body
+
     try {
-        const candidate = await FormData.find({ applicationId: id });
-        console.log('Candidate:', candidate); 
+        const candidate = await FormData.findOne({ applicationId: id });
+        console.log('Candidate:', candidate);
+
         if (!candidate) {
-            return res.status(404).send('candidate not found');
+            return res.status(404).send('Candidate not found');
         }
-        candidate.applicationstatus = true;
-        res.json(candidate);
+
+        // Update the application status
+        candidate.applicationstatus = {
+            status: Apstatus,
+            OfficerName: ApOfficerName,
+        };
+
+        // Update the admit card status
+        candidate.admitcard = {
+            status: admitcardstatus,
+            OfficerName: admitcardofficer,
+        };
+
+        // Update the interview outcome details
+        candidate.interviewoutcome = {
+            date: interviewdate,
+            time: interviewtime,
+            OfficerName: interviewofficer,
+        };
+
+        // Update the selection letter status
+        candidate.selectionletter = {
+            status: selectionletterstatus,
+            OfficerName: selectionletterofficer,
+        };
+
+        // Update the confirmation letter status
+        candidate.confirmationletter = {
+            status: confirmationletterstatus,
+            OfficerName: confirmationletterofficer,
+        };
+
+        await candidate.save(); // Save the updated candidate to the database
+        res.json(candidate); // Return the updated candidate
     } catch (error) {
-        console.error('Error fetching candidate:', error);
-        res.status(500).send('Error fetching candidate.');
+        console.error('Error updating candidate:', error);
+        res.status(500).send('Error updating candidate.');
     }
-}
+};
+
+
 
 module.exports = {
     HandileUpdateuser,

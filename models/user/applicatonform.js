@@ -4,9 +4,6 @@ const formSchema = new mongoose.Schema({
   applicationId: {
     type: Number,
   },
-  applicationstatus: {
-    type: Boolean
-  },
   applyFor: { type: String, required: true },
   candidateName: { type: String, required: true },
   fatherName: { type: String, required: true },
@@ -16,7 +13,6 @@ const formSchema = new mongoose.Schema({
     enum: ['Male', 'Female', 'Other'],
     default: 'Male'
   },
-
   mobileNumber: { 
     type: String,
     required: true,
@@ -45,7 +41,65 @@ const formSchema = new mongoose.Schema({
   degreepercentage: { type: String },
   passport: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' },
   class10th: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' },
-  aadhar: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' }
+  aadhar: { type: mongoose.Schema.Types.ObjectId, ref: 'uploads.files' },
+  applicationstatus: {
+    status: {
+      type: String,
+      enum: ['Not Checked', 'Approved', 'Rejected'],
+      default: 'Not Checked'
+    },
+    OfficerName: {
+      type: String,
+      default:''
+    }
+  },
+  admitcard: {
+    status: {
+      type: String,
+      enum: ['Not Checked', 'Approved', 'Rejected'],
+      default: 'Not Checked'
+    },
+    OfficerName: {
+      type: String,
+      default:''
+    }
+  },
+  interviewoutcome:{
+    date:{
+      type:String,
+      default:''
+    },
+    time:{
+      type:String,
+      default:''
+    },
+    OfficerName: {
+      type: String,
+      default:''
+    }
+  },
+  selectionletter:{
+    status: {
+      type: String,
+      enum: ['Not Checked', 'Approved', 'Rejected'],
+      default: 'Not Checked'
+    },
+    OfficerName: {
+      type: String,
+      default:''
+    }
+  },
+  confirmationletter:{
+    status: {
+      type: String,
+      enum: ['Not Checked', 'Approved', 'Rejected'],
+      default: 'Not Checked'
+    },
+    OfficerName: {
+      type: String,
+      default:''
+    }
+  }
 });
 
 const FormData = mongoose.model('UserFormData', formSchema);

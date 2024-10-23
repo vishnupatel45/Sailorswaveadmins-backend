@@ -2,7 +2,10 @@ const mongoose = require('mongoose')
 
 const HandileDBconnection = async (url) =>{
     try{
-        await  mongoose.connect(url)
+        await  mongoose.connect(url,{
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+          })
         console.log('db is connected')
 
     }catch(error){
