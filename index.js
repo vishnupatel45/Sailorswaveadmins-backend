@@ -116,6 +116,7 @@ app.get('/candidates', async (req, res) => {
 });
 
 // Get file by ID
+// Get file by ID
 app.get('/fileById/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -126,8 +127,7 @@ app.get('/fileById/:id', async (req, res) => {
 
     const downloadStream = gfsBucket.openDownloadStream(file._id);
     res.set('Content-Type', file.contentType);
-    res.set('Content-Disposition', attachment);
-    filename=`${file.filename}`;
+    res.set('Content-Disposition', `attachment; filename="${file.filename}"`); // Corrected line
     downloadStream.pipe(res);
   } catch (error) {
     console.error('Error fetching file by id:', error);
