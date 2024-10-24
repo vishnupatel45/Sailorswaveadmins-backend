@@ -1,10 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
-const { FormData } = require('./models/user/applicatonform.js')
-const { Subadmin } = require('./models/admin/subadmin.js')
-const { upload } = require('./utils/adminfiles.js')
-const { mainSubadmin } = require('./models/subadmin/mainsubadmin.js');
 const { userRoute } = require('./routes/user/user.js');
 const { adminroute } = require('./routes/admin/admin.js');
 const { subadminroute } = require('./routes/subadmin/subadmin.js');
