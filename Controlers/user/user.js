@@ -61,9 +61,31 @@ const HandileGetuser = async (req, res) => {
 
 const HandileUpdateuser = async (req, res) => {
     const { id } = req.params;
-    const {Apstatus,ApOfficerName,admitcardstatus,admitcardofficer,interviewdate,interviewtime,interviewofficer,selectionletterstatus,
-        selectionletterofficer,confirmationletterstatus,confirmationletterofficer} = req.body; // Destructure all relevant fields from the request body
-
+    const {
+        Apstatus,
+        ApOfficerName,
+        admitcardstatus,
+        admitcarddate,
+        admitcardtime,
+        admitcardofficer,
+        interviewfeedback,
+        interviewstatus,
+        interviewofficer,
+        selectionletterstatus,
+        initialamount,
+        deadlinedate,
+        selectionletterofficer,
+        confirmationletterstatus,
+        instalment2amt,
+        instalment3amt,
+        instalment2dat,
+        instalment3dat,
+        confirmationletterofficer
+    } = req.body; // Destructure all relevant fields from the request body
+    console.log(instalment2amt,
+        instalment3amt,
+        instalment2dat,
+        instalment3dat,'backend initalamount')
     try {
         const candidate = await FormData.findOne({ applicationId: id });
         console.log('Candidate:', candidate);
@@ -75,32 +97,36 @@ const HandileUpdateuser = async (req, res) => {
         // Update the application status
         candidate.applicationstatus = {
             status: Apstatus,
-            OfficerName: ApOfficerName,
+            OfficerName: ApOfficerName
         };
-
         // Update the admit card status
         candidate.admitcard = {
             status: admitcardstatus,
-            OfficerName: admitcardofficer,
+            date: admitcarddate,
+            time: admitcardtime,
+            OfficerName: admitcardofficer
         };
-
         // Update the interview outcome details
         candidate.interviewoutcome = {
-            date: interviewdate,
-            time: interviewtime,
-            OfficerName: interviewofficer,
+            interviewFeedback: interviewfeedback,
+            status:interviewstatus,
+            OfficerName: interviewofficer
         };
-
         // Update the selection letter status
         candidate.selectionletter = {
             status: selectionletterstatus,
-            OfficerName: selectionletterofficer,
+            InitialAmount:initialamount,
+            DeadlineDate:deadlinedate,
+            OfficerName: selectionletterofficer
         };
-
         // Update the confirmation letter status
         candidate.confirmationletter = {
             status: confirmationletterstatus,
-            OfficerName: confirmationletterofficer,
+            InstalmentAmount2:instalment2amt,
+            InstalmentAmount3:instalment3amt,
+            InstalmentDate2:instalment2dat,
+            InstalmentDate3:instalment3dat,
+            OfficerName: confirmationletterofficer
         };
 
         await candidate.save(); // Save the updated candidate to the database
@@ -110,6 +136,7 @@ const HandileUpdateuser = async (req, res) => {
         res.status(500).send('Error updating candidate.');
     }
 };
+
 
 
 

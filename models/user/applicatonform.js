@@ -59,12 +59,6 @@ const formSchema = new mongoose.Schema({
       enum: ['Not Checked', 'Approved', 'Rejected'],
       default: 'Not Checked'
     },
-    OfficerName: {
-      type: String,
-      default:''
-    }
-  },
-  interviewoutcome:{
     date:{
       type:String,
       default:''
@@ -78,11 +72,34 @@ const formSchema = new mongoose.Schema({
       default:''
     }
   },
-  selectionletter:{
+  interviewoutcome:{
+    interviewFeedback:{
+      type: String,
+      default:''
+    },
     status: {
       type: String,
       enum: ['Not Checked', 'Approved', 'Rejected'],
       default: 'Not Checked'
+    },
+    OfficerName: {
+      type: String,
+      default:''
+    }
+  },
+  selectionletter:{
+    status: {
+      type: String,
+      enum: ['Not Checked', 'Generated', 'NotGenerated'],
+      default: 'Not Checked'
+    },
+    InitialAmount:{
+      type:String,
+      default:0
+    },
+    DeadlineDate:{
+      type:String,
+      default:''
     },
     OfficerName: {
       type: String,
@@ -94,6 +111,22 @@ const formSchema = new mongoose.Schema({
       type: String,
       enum: ['Not Checked', 'Approved', 'Rejected'],
       default: 'Not Checked'
+    },
+    InstalmentAmount2:{
+      type: String,
+      default:''
+    },
+    InstalmentAmount3:{
+      type: String,
+      default:''
+    },
+    InstalmentDate2:{
+      type:String,
+      default:''
+    },
+    InstalmentDate3:{
+      type:String,
+      default:''
     },
     OfficerName: {
       type: String,
